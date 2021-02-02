@@ -19,10 +19,7 @@ public class ResponseUser {
     ZonedDateTime createdAt;
     BigDecimal calculations;
 
-    public static ResponseUser of(User user) {
-        var calc = new BigDecimal(6).setScale(6)
-                .divide(new BigDecimal(user.getFollowers()), RoundingMode.HALF_UP)
-                .multiply(new BigDecimal(2 + user.getPublicRepos()));
+    public static ResponseUser of(User user, BigDecimal calculations) {
         return ResponseUser.builder()
                 .id(user.getId())
                 .login(user.getLogin())
@@ -30,7 +27,7 @@ public class ResponseUser {
                 .type(user.getType())
                 .avatarUrl(user.getAvatarUrl())
                 .createdAt(user.getCreatedAt())
-                .calculations(calc)
+                .calculations(calculations)
                 .build();
     }
 }
