@@ -7,7 +7,6 @@ import org.springframework.boot.test.context.SpringBootTest;
 
 import java.math.BigDecimal;
 import java.time.ZoneId;
-import java.time.ZoneOffset;
 import java.time.ZonedDateTime;
 
 import static org.junit.jupiter.api.Assertions.*;
@@ -27,7 +26,7 @@ class UsersServiceTest {
         String octocatName = "The Octocat";
         String octocatType = "User";
         String octocatAvatarUrl = "https://avatars.githubusercontent.com/u/583231?v=4";
-        ZonedDateTime octocatCreatedAt = ZonedDateTime.of(2011,01,25,18,44,36,0, ZoneId.of("UTC"));
+        ZonedDateTime octocatCreatedAt = ZonedDateTime.of(2011,1,25,18,44,36,0, ZoneId.of("UTC"));
 
         // When
         var user = usersService.getUser(octocatLogin);
@@ -53,7 +52,7 @@ class UsersServiceTest {
         String codeempireName = "Marcin Rozycki";
         String codeempireType = "User";
         String codeempireAvatarUrl = "https://avatars.githubusercontent.com/u/4615051?v=4";
-        ZonedDateTime codeempireCreatedAt = ZonedDateTime.of(2013,06,04,20,51,15,0, ZoneId.of("UTC"));
+        ZonedDateTime codeempireCreatedAt = ZonedDateTime.of(2013,6,4,20,51,15,0, ZoneId.of("UTC"));
 
         // When
         var user = usersService.getUser(codeempireLogin);
@@ -81,6 +80,6 @@ class UsersServiceTest {
         // Then
         assertNotNull(user, "Response should be not null");
         // Calculation for user with 0 followers should be 0
-        assertTrue(user.getCalculations().compareTo(BigDecimal.ZERO) == 0);
+        assertEquals(user.getCalculations(), BigDecimal.ZERO);
     }
 }
