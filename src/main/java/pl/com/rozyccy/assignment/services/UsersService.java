@@ -7,6 +7,7 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Service;
 import org.springframework.web.client.RestTemplate;
 import org.springframework.web.servlet.function.EntityResponse;
+import pl.com.rozyccy.assignment.domain.ResponseUser;
 import pl.com.rozyccy.assignment.domain.User;
 
 import java.util.Map;
@@ -14,9 +15,11 @@ import java.util.Map;
 @Service
 public class UsersService {
 
-    public User getUser(String login) throws JsonProcessingException {
-        var resp = getGitHubEndpoint(login);
-        return resp;
+    public ResponseUser getUser(String login) throws JsonProcessingException {
+        var user = getGitHubEndpoint(login);
+        var rUser = ResponseUser.of(user);
+        System.out.println(rUser.getCalculations());
+        return rUser;
     }
 
     private User getGitHubEndpoint(String login) throws JsonProcessingException {

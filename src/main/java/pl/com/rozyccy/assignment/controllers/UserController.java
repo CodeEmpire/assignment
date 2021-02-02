@@ -8,6 +8,7 @@ import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.RestController;
 import org.springframework.web.servlet.function.EntityResponse;
+import pl.com.rozyccy.assignment.domain.ResponseUser;
 import pl.com.rozyccy.assignment.domain.User;
 import pl.com.rozyccy.assignment.services.UsersService;
 
@@ -18,7 +19,7 @@ public class UserController {
     UsersService usersService;
 
     @GetMapping("/users/{login}")
-    ResponseEntity<User> getUser(@PathVariable String login) throws JsonProcessingException {
+    ResponseEntity<ResponseUser> getUser(@PathVariable String login) throws JsonProcessingException {
         System.out.println("Endpoint requested. Parameter login is: " + login);
         return new ResponseEntity<>(usersService.getUser(login), HttpStatus.OK);
     }

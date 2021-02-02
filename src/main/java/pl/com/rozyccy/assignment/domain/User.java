@@ -16,6 +16,6 @@ public class User {
     @JsonAlias("created_at")
     ZonedDateTime createdAt;
     int followers;
+    @JsonAlias("public_repos")
     int publicRepos;
-    double calculations;
 }
