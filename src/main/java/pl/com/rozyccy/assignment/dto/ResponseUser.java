@@ -1,11 +1,10 @@
-package pl.com.rozyccy.assignment.domain;
+package pl.com.rozyccy.assignment.dto;
 
-import com.fasterxml.jackson.annotation.JsonAlias;
 import lombok.Builder;
 import lombok.Data;
+import pl.com.rozyccy.assignment.domain.User;
 
 import java.math.BigDecimal;
-import java.math.RoundingMode;
 import java.time.ZonedDateTime;
 
 @Data

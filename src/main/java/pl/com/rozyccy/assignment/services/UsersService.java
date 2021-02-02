@@ -4,7 +4,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.core.env.Environment;
 import org.springframework.stereotype.Service;
 import org.springframework.web.client.RestTemplate;
-import pl.com.rozyccy.assignment.domain.ResponseUser;
+import pl.com.rozyccy.assignment.dto.ResponseUser;
 import pl.com.rozyccy.assignment.domain.User;
 
 import java.math.BigDecimal;
@@ -19,16 +19,12 @@ public class UsersService {
 
     public ResponseUser getUser(String login) {
         var user = getGitHubEndpoint(login);
-        var rUser = ResponseUser.of(user, doCalculationOverUser(user));
-        System.out.println(rUser.getCalculations());
-        return rUser;
+        return ResponseUser.of(user, doCalculationOverUser(user));
     }
 
     private User getGitHubEndpoint(String login) {
         RestTemplate restTemplate = new RestTemplate();
-        var response = restTemplate.getForObject(Objects.requireNonNull(env.getProperty("source.rest.url", String.class)), User.class, login);
-        System.out.println("Response is " + response);
-        return response;
+        return restTemplate.getForObject(Objects.requireNonNull(env.getProperty("source.rest.url", String.class)), User.class, login);
     }
 
     private BigDecimal doCalculationOverUser(User user) {
@@ -37,7 +33,10 @@ public class UsersService {
             calc = BigDecimal.ZERO;
         }
         else {
-            var scale = Objects.requireNonNull(env.getProperty("user.calculations.scale", Integer.class));
+            var scale = env.getProperty("user.calculations.scale", Integer.class);
+            if (scale == null) {
+                scale = 4;
+            }
             calc = new BigDecimal(6)
                     .setScale(scale, RoundingMode.HALF_UP)
                     .divide(new BigDecimal(user.getFollowers()), RoundingMode.HALF_UP)
