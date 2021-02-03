@@ -89,14 +89,22 @@ class UsersServiceTest {
 
     @Test
     public void testDbRequestCounting() {
-        // Given
-        String login = "m-rozycki";
+        requestAppToVerifyIsDbCountingRequests("m-rozycki", 1);
+    }
 
+    @Test
+    public void testDbRequestCountingMultiple() {
+        requestAppToVerifyIsDbCountingRequests("m-rozycki", 10);
+    }
+
+    private void requestAppToVerifyIsDbCountingRequests(String login, int requestXTimes) {
         List<Integer> requestCountBefore = jdbcTemplate.query("SELECT request_count FROM requests WHERE login = '" + login + "'",
                 (resultSet, rowNum) -> resultSet.getInt("request_count"));
 
         // When
-        usersService.getUser(login);
+        for (int i = 0; i < requestXTimes; i++) {
+            usersService.getUser(login);
+        }
 
         // Then
         List<Integer> requestCountAfter = jdbcTemplate.query("SELECT request_count FROM requests WHERE login = '" + login + "'",
@@ -104,6 +112,6 @@ class UsersServiceTest {
 
         assertEquals(1, requestCountBefore.size(), "It should be only one row for login");
         assertEquals(1, requestCountAfter.size(), "It should be only one row for login");
-        assertEquals(requestCountBefore.get(0) +1, requestCountAfter.get(0));
+        assertEquals(requestCountBefore.get(0) + requestXTimes, requestCountAfter.get(0));
     }
 }
