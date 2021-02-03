@@ -24,6 +24,8 @@ public class UsersService {
     JdbcTemplate jdbcTemplate;
 
     public ResponseUser getUser(String login) {
+        // Changing login to lowerCase, because for endpoint user "CodeEmpire" and "codeempire" is the same
+        login = login.toLowerCase();
         var user = getGitHubEndpoint(login);
         saveRequestCountInDb(login);
         return ResponseUser.of(user, doCalculationOverUser(user));
