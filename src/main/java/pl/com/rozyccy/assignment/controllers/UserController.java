@@ -13,11 +13,10 @@ import pl.com.rozyccy.assignment.services.UsersService;
 public class UserController {
 
     @Autowired
-    UsersService usersService;
+    private UsersService usersService;
 
     @GetMapping("/users/{login}")
     ResponseEntity<ResponseUser> getUser(@PathVariable String login) {
-        System.out.println("Endpoint requested. Parameter login is: " + login);
         return new ResponseEntity<>(usersService.getUser(login), HttpStatus.OK);
     }
 

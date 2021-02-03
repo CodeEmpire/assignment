@@ -10,13 +10,13 @@ import java.time.ZonedDateTime;
 @Data
 @Builder
 public class ResponseUser {
-    long id;
-    String login;
-    String name;
-    String type;
-    String avatarUrl;
-    ZonedDateTime createdAt;
-    BigDecimal calculations;
+    private long id;
+    private String login;
+    private String name;
+    private String type;
+    private String avatarUrl;
+    private ZonedDateTime createdAt;
+    private BigDecimal calculations;
 
     public static ResponseUser of(User user, BigDecimal calculations) {
         return ResponseUser.builder()

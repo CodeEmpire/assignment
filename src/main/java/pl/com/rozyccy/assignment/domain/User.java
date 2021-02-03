@@ -7,15 +7,15 @@ import java.time.ZonedDateTime;
 
 @Data
 public class User {
-    long id;
-    String login;
-    String name;
-    String type;
+    private long id;
+    private String login;
+    private String name;
+    private String type;
     @JsonAlias("avatar_url")
-    String avatarUrl;
+    private String avatarUrl;
     @JsonAlias("created_at")
-    ZonedDateTime createdAt;
-    int followers;
+    private ZonedDateTime createdAt;
+    private int followers;
     @JsonAlias("public_repos")
-    int publicRepos;
+    private int publicRepos;
 }

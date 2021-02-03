@@ -18,16 +18,16 @@ import java.util.Objects;
 public class UsersService {
 
     @Autowired
-    Environment env;
+    private Environment env;
 
     @Autowired
-    JdbcTemplate jdbcTemplate;
+    private JdbcTemplate jdbcTemplate;
 
     public ResponseUser getUser(String login) {
         // Changing login to lowerCase, because for endpoint user "CodeEmpire" and "codeempire" is the same
-        login = login.toLowerCase();
-        var user = getGitHubEndpoint(login);
-        saveRequestCountInDb(login);
+        var lowercaseLogin = login.toLowerCase();
+        var user = getGitHubEndpoint(lowercaseLogin);
+        saveRequestCountInDb(lowercaseLogin);
         return ResponseUser.of(user, doCalculationOverUser(user));
     }
 
