@@ -6,9 +6,8 @@ import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.client.RestTemplate;
-import pl.com.rozyccy.assignment.domain.Request;
-import pl.com.rozyccy.assignment.dto.ResponseUser;
 import pl.com.rozyccy.assignment.domain.User;
+import pl.com.rozyccy.assignment.dto.ResponseUser;
 
 import java.math.BigDecimal;
 import java.math.RoundingMode;
@@ -55,16 +54,13 @@ public class UsersService {
 
     @Transactional
     public void saveRequestCountInDb(String login) {
-
+        // Create table if not exists
         jdbcTemplate.execute("CREATE TABLE IF NOT EXISTS requests(login VARCHAR(100), request_count NUMBER)");
+        // Get request count for login
+        List<Integer> req = jdbcTemplate.query("SELECT request_count FROM requests WHERE login = '" + login + "'",
+                (resultSet, rowNum) -> resultSet.getInt("request_count"));
 
-        System.out.println("Before query");
-        List<Request> req = jdbcTemplate.query("SELECT login, request_count FROM requests WHERE login = '" + login + "'",
-                (resultSet, rowNum) -> new Request(resultSet.getString("login"), resultSet.getInt("request_count")));
-
-        req.forEach(System.out::println);
-
-
+        // If row for login doesn't exists than insert row else update existed row
         if (req.isEmpty()) {
             jdbcTemplate.execute("INSERT INTO requests (login, request_count) VALUES ('" + login + "', 1)");
         }
@@ -72,11 +68,5 @@ public class UsersService {
             jdbcTemplate.execute("UPDATE requests SET request_count = request_count + 1 WHERE login = '" + login + "'");
 
         }
-        System.out.println("After query");
-        List<Request> req2 = jdbcTemplate.query("SELECT login, request_count FROM requests WHERE login = '" + login + "'",
-                (resultSet, rowNum) -> new Request(resultSet.getString("login"), resultSet.getInt("request_count")));
-
-        req2.forEach(System.out::println);
-
     }
 }
