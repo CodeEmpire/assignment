@@ -4,10 +4,13 @@ import com.fasterxml.jackson.core.JsonProcessingException;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
+import org.springframework.jdbc.core.JdbcTemplate;
+import pl.com.rozyccy.assignment.domain.Request;
 
 import java.math.BigDecimal;
 import java.time.ZoneId;
 import java.time.ZonedDateTime;
+import java.util.List;
 
 import static org.junit.jupiter.api.Assertions.*;
 
@@ -16,6 +19,9 @@ class UsersServiceTest {
 
     @Autowired
     UsersService usersService;
+
+    @Autowired
+    JdbcTemplate jdbcTemplate;
 
     @Test
     public void testGetUser() throws JsonProcessingException {
@@ -81,5 +87,27 @@ class UsersServiceTest {
         assertNotNull(user, "Response should be not null");
         // Calculation for user with 0 followers should be 0
         assertEquals(user.getCalculations(), BigDecimal.ZERO);
+    }
+
+    @Test
+    public void testDbRequestCounting() {
+        // Given
+        String login = "m-rozycki";
+
+        List<Integer> requestCountBefore = jdbcTemplate.query("SELECT request_count FROM requests WHERE login = '" + login + "'",
+                (resultSet, rowNum) -> resultSet.getInt("request_count"));
+        System.out.println("Before" + requestCountBefore);
+
+        // When
+        var user = usersService.getUser(login);
+
+        // Then
+        List<Integer> requestCountAfter = jdbcTemplate.query("SELECT request_count FROM requests WHERE login = '" + login + "'",
+                (resultSet, rowNum) -> resultSet.getInt("request_count"));
+        System.out.println("Before" + requestCountAfter);
+
+        assertEquals(1, requestCountBefore.size(), "It should be only one row for login");
+        assertEquals(1, requestCountAfter.size(), "It should be only one row for login");
+        assertEquals(requestCountBefore.get(0).intValue()+1, requestCountAfter.get(0).intValue());
     }
 }
