@@ -1,13 +1,14 @@
 package pl.com.rozyccy.assignment.services;
 
-import com.fasterxml.jackson.core.JsonProcessingException;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
+import org.springframework.jdbc.core.JdbcTemplate;
 
 import java.math.BigDecimal;
 import java.time.ZoneId;
 import java.time.ZonedDateTime;
+import java.util.List;
 
 import static org.junit.jupiter.api.Assertions.*;
 
@@ -17,8 +18,11 @@ class UsersServiceTest {
     @Autowired
     UsersService usersService;
 
+    @Autowired
+    JdbcTemplate jdbcTemplate;
+
     @Test
-    public void testGetUser() throws JsonProcessingException {
+    public void testGetUser() {
         // Given
         // Test for octacat user
         String octocatLogin = "octocat";
@@ -44,7 +48,7 @@ class UsersServiceTest {
     }
 
     @Test
-    public void testGetMyUser() throws JsonProcessingException {
+    public void testGetMyUser() {
         // Given
         // Test for codeempire user
         String codeempireLogin = "CodeEmpire";
@@ -70,7 +74,7 @@ class UsersServiceTest {
     }
 
     @Test
-    public void testUserWithZeroFollowers() throws JsonProcessingException {
+    public void testUserWithZeroFollowers() {
         // Given
         String login = "m-rozycki";
 
@@ -81,5 +85,33 @@ class UsersServiceTest {
         assertNotNull(user, "Response should be not null");
         // Calculation for user with 0 followers should be 0
         assertEquals(user.getCalculations(), BigDecimal.ZERO);
+    }
+
+    @Test
+    public void testDbRequestCounting() {
+        requestAppToVerifyIsDbCountingRequests("m-rozycki", 1);
+    }
+
+    @Test
+    public void testDbRequestCountingMultiple() {
+        requestAppToVerifyIsDbCountingRequests("m-rozycki", 10);
+    }
+
+    private void requestAppToVerifyIsDbCountingRequests(String login, int requestXTimes) {
+        List<Integer> requestCountBefore = jdbcTemplate.query("SELECT request_count FROM requests WHERE login = '" + login + "'",
+                (resultSet, rowNum) -> resultSet.getInt("request_count"));
+
+        // When
+        for (int i = 0; i < requestXTimes; i++) {
+            usersService.getUser(login);
+        }
+
+        // Then
+        List<Integer> requestCountAfter = jdbcTemplate.query("SELECT request_count FROM requests WHERE login = '" + login + "'",
+                (resultSet, rowNum) -> resultSet.getInt("request_count"));
+
+        assertEquals(1, requestCountBefore.size(), "It should be only one row for login");
+        assertEquals(1, requestCountAfter.size(), "It should be only one row for login");
+        assertEquals(requestCountBefore.get(0) + requestXTimes, requestCountAfter.get(0));
     }
 }
