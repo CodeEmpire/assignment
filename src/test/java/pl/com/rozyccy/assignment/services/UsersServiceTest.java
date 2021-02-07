@@ -4,6 +4,8 @@ import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.jdbc.core.JdbcTemplate;
+import org.springframework.jdbc.core.namedparam.MapSqlParameterSource;
+import org.springframework.jdbc.core.namedparam.NamedParameterJdbcTemplate;
 
 import java.math.BigDecimal;
 import java.time.ZoneId;
@@ -19,7 +21,7 @@ class UsersServiceTest {
     UsersService usersService;
 
     @Autowired
-    JdbcTemplate jdbcTemplate;
+    NamedParameterJdbcTemplate namedParameterJdbcTemplate;
 
     @Test
     public void testGetUser() {
@@ -98,8 +100,11 @@ class UsersServiceTest {
     }
 
     private void requestAppToVerifyIsDbCountingRequests(String login, int requestXTimes) {
-        List<Integer> requestCountBefore = jdbcTemplate.query("SELECT request_count FROM requests WHERE login = '" + login + "'",
-                (resultSet, rowNum) -> resultSet.getInt("request_count"));
+        var sqlParamLogin = new MapSqlParameterSource("login", login);
+        List<Integer> requestCountBefore = namedParameterJdbcTemplate.queryForList(
+                "SELECT request_count FROM requests WHERE login = :login",
+                sqlParamLogin,
+                Integer.class);
 
         // When
         for (int i = 0; i < requestXTimes; i++) {
@@ -107,8 +112,10 @@ class UsersServiceTest {
         }
 
         // Then
-        List<Integer> requestCountAfter = jdbcTemplate.query("SELECT request_count FROM requests WHERE login = '" + login + "'",
-                (resultSet, rowNum) -> resultSet.getInt("request_count"));
+        List<Integer> requestCountAfter = namedParameterJdbcTemplate.queryForList(
+                "SELECT request_count FROM requests WHERE login = :login",
+                sqlParamLogin,
+                Integer.class);
 
         assertEquals(1, requestCountBefore.size(), "It should be only one row for login");
         assertEquals(1, requestCountAfter.size(), "It should be only one row for login");
@@ -117,8 +124,8 @@ class UsersServiceTest {
 
     @Test
     public void testSQLInjection() {
-        String sqlInjection = "x-marozycki' or '1' = '1";
-        List<Integer> sumAllRequestCountBefore = jdbcTemplate.query("SELECT sum(request_count) all_request FROM requests ",
+        String sqlInjection = "x-mrozycki' or '1' = '1";
+        List<Integer> sumAllRequestCountBefore = namedParameterJdbcTemplate.query("SELECT sum(request_count) all_request FROM requests ",
                 (resultSet, rowNum) -> resultSet.getInt("all_request"));
 
         try {
@@ -127,10 +134,11 @@ class UsersServiceTest {
             // swallow exception
         }
 
-        List<Integer> sumAllRequestCountAfter = jdbcTemplate.query("SELECT sum(request_count) all_request FROM requests ",
+        List<Integer> sumAllRequestCountAfter = namedParameterJdbcTemplate.query("SELECT sum(request_count) all_request FROM requests ",
                 (resultSet, rowNum) -> resultSet.getInt("all_request"));
 
-        // user doesn't exist the value shouldn't increase
-        assertEquals(sumAllRequestCountBefore, sumAllRequestCountAfter, "Probably SQL Injected!!!");
+        // login doesn't find, but try of use API write down in DB, so request count increased by one.
+        // in DB in field login we will see try of sql injection
+        assertEquals(sumAllRequestCountBefore.get(0) + 1, sumAllRequestCountAfter.get(0), "Probably SQL Injected!!!");
     }
 }
