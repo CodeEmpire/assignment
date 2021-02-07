@@ -114,4 +114,23 @@ class UsersServiceTest {
         assertEquals(1, requestCountAfter.size(), "It should be only one row for login");
         assertEquals(requestCountBefore.get(0) + requestXTimes, requestCountAfter.get(0));
     }
+
+    @Test
+    public void testSQLInjection() {
+        String sqlInjection = "x-marozycki' or '1' = '1";
+        List<Integer> sumAllRequestCountBefore = jdbcTemplate.query("SELECT sum(request_count) all_request FROM requests ",
+                (resultSet, rowNum) -> resultSet.getInt("all_request"));
+
+        try {
+            usersService.getUser(sqlInjection);
+        }catch (Exception e) {
+            // swallow exception
+        }
+
+        List<Integer> sumAllRequestCountAfter = jdbcTemplate.query("SELECT sum(request_count) all_request FROM requests ",
+                (resultSet, rowNum) -> resultSet.getInt("all_request"));
+
+        // user doesn't exist the value shouldn't increase
+        assertEquals(sumAllRequestCountBefore, sumAllRequestCountAfter, "Probably SQL Injected!!!");
+    }
 }
